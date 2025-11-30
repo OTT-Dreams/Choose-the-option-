@@ -1,144 +1,70 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Position Picker — Intercore-style</title>
-  <style>
-    :root{--bg:#0f172a;--card:#f8fafc;--accent:#06b6d4;--muted:#94a3b8}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#071022 0%, #071833 60%);color:var(--card);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .wrap{max-width:980px;width:100%;text-align:center}
-    h1{margin:0 0 8px;font-size:1.6rem}
-    p.lead{margin:0 0 20px;color:var(--muted)}
-    .picker{background:rgba(255,255,255,0.04);padding:24px;border-radius:14px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
-    .display{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
-    .image-wrap{width:300px;height:220px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:8px;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
-    .image-wrap img{max-width:100%;max-height:100%;object-fit:cover;border-radius:8px}
-    .name{font-size:1.25rem;font-weight:700}
-    .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    button{appearance:none;border:0;background:var(--accent);color:#052023;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(6,182,212,0.12);transition:transform .15s ease}
-    button.secondary{background:transparent;color:var(--card);border:1px solid rgba(255,255,255,0.06)}
-    button:active{transform:translateY(2px)}
-    .grid{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-    .card{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;gap:10px;cursor:pointer}
-    .card img{width:56px;height:56px;object-fit:cover;border-radius:6px}
-    .card .cname{font-size:0.95rem}
-    footer{margin-top:12px;font-size:0.82rem;color:var(--muted)}
-    .chosen{animation:pop .45s ease}
-    @keyframes pop{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
-    @media (max-width:520px){.image-wrap{width:100%;height:180px}}
-  </style>
+<meta charset="utf-8">
+<title>Random Video Picker</title>
+<style>
+  body { background:#111; color:#fff; font-family:Arial; text-align:center; padding:20px; }
+  .box { max-width:600px; margin:auto; background:#222; padding:20px; border-radius:10px; }
+  video { width:100%; border-radius:10px; margin-top:15px; }
+  button { padding:12px 20px; border:0; border-radius:8px; cursor:pointer;
+           font-size:18px; margin:10px; }
+  .pick { background:#00e5ff; color:#000; }
+  .repeat { background:#444; color:#fff; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Intercore-style Position Picker</h1>
-    <p class="lead">Click <strong>Choose</strong> to reveal a random option. Click <strong>Repeat</strong> to get another one.</p>
 
-    <div class="picker" aria-live="polite">
-      <div class="display">
-        <div class="image-wrap" id="imageWrap" title="Selected image">
-          <img src="" alt="No choice yet" id="selectedImg" />
-        </div>
-        <div>
-          <div class="name" id="name">—</div>
-          <div style="color:var(--muted);margin-top:8px">Tip: Click <em>Show All Options</em> to pick a specific item.</div>
-        </div>
-      </div>
+<div class="box">
+  <h2>Random Video Picker</h2>
 
-      <div class="controls">
-        <button id="chooseBtn">Choose</button>
-        <button id="repeatBtn" class="secondary">Repeat</button>
-        <button id="showAll" class="secondary">Show All Options</button>
-      </div>
+  <h3 id="title">No video selected</h3>
+  <video id="player" controls></video>
 
-      <div class="grid" id="allGrid" style="display:none;margin-top:14px"></div>
-    </div>
+  <br>
 
-    <footer>Made for personal use • Deploy to GitHub Pages by placing this file as <code>index.html</code></footer>
-  </div>
+  <button class="pick" onclick="pick()">Choose</button>
+  <button class="repeat" onclick="pick()">Repeat</button>
+</div>
 
-  <script>
-    // Clean unique list provided by user (13 items)
-    const options = [
-      {name: 'Face Off', img: 'https://bestsexpositions.com/wp-content/uploads/2022/09/face-off-position-1.jpg', url: 'https://bestsexpositions.com/face-off-position/'},
-      {name: 'The Rider', img: 'https://bestsexpositions.com/wp-content/uploads/2021/07/kamasutra-rider-position.jpg', url: 'https://bestsexpositions.com/kamasutra-rider-position/'},
-      {name: 'Eagle Position', img: 'https://bestsexpositions.com/wp-content/uploads/2022/07/eagle-position.jpg', url: 'https://bestsexpositions.com/eagle-position/'},
-      {name: 'Sideways Missionary', img: 'https://bestsexpositions.com/wp-content/uploads/2022/03/sideways-missionary.jpg', url: 'https://bestsexpositions.com/sideways-missionary-position/'},
-      {name: 'Doggy Style', img: 'https://bestsexpositions.com/wp-content/uploads/2021/01/doggy-style.jpg', url: 'https://bestsexpositions.com/doggy-style-position/'},
-      {name: '69', img: 'https://bestsexpositions.com/wp-content/uploads/2021/06/69-position.jpg', url: 'https://bestsexpositions.com/69-position/'},
-      {name: 'Cowgirl', img: 'https://bestsexpositions.com/wp-content/uploads/2021/05/cowgirl-position.jpg', url: 'https://bestsexpositions.com/cowgirl-position/'},
-      {name: 'Reverse Cowgirl', img: 'https://bestsexpositions.com/wp-content/uploads/2022/04/reverse-cowgirl.jpg', url: 'https://bestsexpositions.com/reverse-cowgirl-position/'},
-      {name: 'Missionary', img: 'https://bestsexpositions.com/wp-content/uploads/2021/02/missionary-position.jpg', url: 'https://bestsexpositions.com/missionary-position/'},
-      {name: 'Eat Pussy', img: 'https://bestsexpositions.com/wp-content/uploads/2022/08/how-to-eat-pussy.jpg', url: 'https://bestsexpositions.com/how-to-eat-pussy/'},
-      {name: 'Lotus', img: 'https://bestsexpositions.com/wp-content/uploads/2021/09/kamasutra-lotus-position.jpg', url: 'https://bestsexpositions.com/kamasutra-lotus-position/'},
-      {name: 'Fingering', img: 'https://bestsexpositions.com/wp-content/uploads/2022/02/how-to-finger-a-girl.jpg', url: 'https://bestsexpositions.com/how-to-finger-a-girl/'},
-      {name: 'Blowjob', img: 'https://bestsexpositions.com/wp-content/uploads/2021/11/11-blowjob-positions.jpg', url: 'https://bestsexpositions.com/11-blowjob-positions/'}
-    ];
+<script>
+  // You will replace these placeholder entries with your actual video names
+  const videos = [
+    { title: "Face off", file: "bsp-faceoff-position-720.mp4" },
 
-    const imageWrap = document.getElementById('imageWrap');
-    const nameEl = document.getElementById('name');
-    const chooseBtn = document.getElementById('chooseBtn');
-    const repeatBtn = document.getElementById('repeatBtn');
-    const showAll = document.getElementById('showAll');
-    const allGrid = document.getElementById('allGrid');
-    const selectedImg = document.getElementById('selectedImg');
+    { title: "The rider", file: "bsp-rider-sex-position-360.mp4" },
 
-    let lastIndex = null;
+    { title: "Eagle position", file: "bsp-eagle-sex-position-360.mp4" },
 
-    function pickRandom(){
-      if(options.length === 0) return null;
-      let i = Math.floor(Math.random()*options.length);
-      if(options.length>1 && i === lastIndex) {
-        i = (i+1) % options.length;
-      }
-      lastIndex = i;
-      return options[i];
-    }
+    { title: "Sideways missionary", file: "bsp-face-to-face-360.mp4" },
 
-    function reveal(option){
-      nameEl.textContent = option.name;
-      selectedImg.src = option.img;
-      selectedImg.alt = option.name;
-      imageWrap.classList.remove('chosen');
-      void imageWrap.offsetWidth;
-      imageWrap.classList.add('chosen');
-    }
+    { title: "Doggy style", file: "bsp-doggystyle-position-360.mp4" }
 
-    chooseBtn.addEventListener('click', ()=>{
-      const opt = pickRandom();
-      if(opt) reveal(opt);
-    });
+{ title: "69", file: "bsp-lexi2-360.mp4" }
 
-    repeatBtn.addEventListener('click', ()=>{
-      const opt = pickRandom();
-      if(opt) reveal(opt);
-    });
+{ title: "Cowgirl", file: "bsp-cowgirl-sex-position-360.mp4" }
 
-    showAll.addEventListener('click', ()=>{
-      if(allGrid.style.display === 'none'){
-        allGrid.style.display = 'grid';
-        populateGrid();
-        showAll.textContent = 'Hide Options';
-      } else {
-        allGrid.style.display = 'none';
-        showAll.textContent = 'Show All Options';
-      }
-    });
+{ title: "Reverse Cowgirl", file: "bsp-reverse-cowgirl-position-360.mp4" }
 
-    function populateGrid(){
-      allGrid.innerHTML = '';
-      options.forEach((o, idx)=>{
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `<img src="${o.img}" alt="${o.name}"/><div class=\"cname\">${o.name}</div>`;
-        div.addEventListener('click', ()=>{ reveal(o); window.scrollTo({top:0,behavior:'smooth'})});
-        allGrid.appendChild(div);
-      })
-    }
+{ title: "Eat pusssy", file: "bsp-best-cunnilingus-360.mp4" }
 
-    // pre-populate grid
-    populateGrid();
-  </script>
+{ title: "Missionary Position", file: "bsp-missionary-sex-360.mp4" }
+
+{ title: "Lotus", file: "bsp-kamasutra-lotus-position-360.mp4" }
+
+{ title: "Fingering", file: "bsp-nancy-360.mp4" }
+
+{ title: "Blowjob", file: "bsp-chloe-720.mp4" }
+  ];
+
+
+  function pick() {
+    let r = Math.floor(Math.random() * videos.length);
+    document.getElementById("title").textContent = videos[r].title;
+    document.getElementById("player").src = vide
+os[r].file;
+  }
+</script>
+
 </body>
 </html>
